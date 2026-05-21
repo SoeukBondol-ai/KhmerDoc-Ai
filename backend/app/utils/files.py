@@ -25,7 +25,7 @@ def extension_for_upload(file:UploadFile) -> str :
     suffix = Path(file.filename or "").suffix.lower()
     return suffix or ".bin"
 
-async def save_uploaded_file(file: UploadFile,destination:Path, max_bytes : int) -> int :
+async def save_upload_file(file: UploadFile,destination:Path, max_bytes : int) -> int :
     size = 0
     destination.parent.mkdir(parents=True, exist_ok=True)
     async with aiofiles.open(destination,"wb") as out_file :

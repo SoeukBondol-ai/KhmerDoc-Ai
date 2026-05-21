@@ -3,33 +3,33 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-class DocumentCreateRespone(BaseModel):
+class DocumentCreateResponse(BaseModel):
     document_id: str 
     filename: str
-    content_type : str
-    size_bytes: str
+    content_type: str
+    size_bytes: int
     saved_path: str
-    created_at : datetime
+    created_at: datetime
 
 class OCRRequest(BaseModel):
-    force : bool = False
+    force: bool = False
 
 class OCRResponse(BaseModel):
-    document_id : str
-    ocr_engine : str = "NextOCR"
-    text : str
-    raw_respone : Any | None = None
-    output_path : str
-    create_at : datetime
+    document_id: str
+    text: str
+    language: str | None = None
+    source: str | None = None
+    raw_response: Any | None = None
+    created_at: datetime
 
 class DocumentRecord(BaseModel):
-    document_id : str
-    original_file_name : str
-    store_file_name : str
-    content_type : str
-    size_bytes : str
-    save_path : Path
-    create_at : datetime
+    document_id: str
+    original_filename: str
+    stored_filename: str
+    content_type: str
+    size_bytes: int
+    saved_path: Path
+    created_at: datetime
     ocr_output_path: Path | None = None
 
 class DocumentDetailResponse(BaseModel):
@@ -39,5 +39,3 @@ class DocumentDetailResponse(BaseModel):
 
 class DocumentListResponse(BaseModel):
     documents: list[DocumentRecord] = Field(default_factory=list)
-
-

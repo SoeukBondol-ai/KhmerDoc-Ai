@@ -13,12 +13,7 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1" 
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
-    next_ocr_username : str = Field(default="", validation_alias="NEXTOCR_USERNAME")
-    nextocr_secret_key: str = Field(default="", validation_alias="NEXTOCR_SECRET_KEY")
-    nextocr_api_url: str = Field(
-        default="https://developer.nextocr.org/ocr_api",
-        validation_alias="NEXTOCR_API_URL",
-    )
+
     upload_dir: Path = Path("storage/uploads")
     ocr_output_dir: Path = Path("storage/ocr_outputs")
     max_upload_mb: int = 15

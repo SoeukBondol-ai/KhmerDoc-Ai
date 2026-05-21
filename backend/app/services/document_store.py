@@ -17,7 +17,7 @@ class DocumentStore:
     def _save_index(self, index:dict[str, dict]) -> None :
         write_json(self.index_path,index)
 
-    def add_ducument(self, record : DocumentRecord) -> None :
+    def add_document(self, record : DocumentRecord) -> None :
         index = self._load_index()
         data = record.model_dump(mode="json")
         index[record.document_id] = data
