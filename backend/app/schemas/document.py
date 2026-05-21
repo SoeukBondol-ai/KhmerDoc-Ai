@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 class DocumentCreateRespone(BaseModel):
     document_id: str 
@@ -16,7 +18,7 @@ class OCRResponse(BaseModel):
     document_id : str
     ocr_engine : str = "NextOCR"
     text : str
-    raw_respone : str
+    raw_respone : Any | None = None
     output_path : str
     create_at : datetime
 
@@ -26,9 +28,9 @@ class DocumentRecord(BaseModel):
     store_file_name : str
     content_type : str
     size_bytes : str
-    save_path : str
+    save_path : Path
     create_at : datetime
-    ocr_output_path: str | None = None
+    ocr_output_path: Path | None = None
 
 class DocumentDetailResponse(BaseModel):
     document: DocumentRecord
