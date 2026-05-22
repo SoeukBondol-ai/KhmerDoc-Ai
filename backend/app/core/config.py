@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     upload_dir: Path = Path("storage/uploads")
     ocr_output_dir: Path = Path("storage/ocr_outputs")
+    extraction_dir: Path = Path("storage/extractions")
     max_upload_mb: int = 15
 
     @property
