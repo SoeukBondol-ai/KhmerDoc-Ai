@@ -3,6 +3,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from app.schemas.extraction import ExtractionResponse
+
 class DocumentCreateResponse(BaseModel):
     document_id: str 
     filename: str
@@ -35,6 +37,7 @@ class DocumentRecord(BaseModel):
 class DocumentDetailResponse(BaseModel):
     document: DocumentRecord
     ocr: OCRResponse | None = None
+    extraction: ExtractionResponse | None = None
 
 
 class DocumentListResponse(BaseModel):
