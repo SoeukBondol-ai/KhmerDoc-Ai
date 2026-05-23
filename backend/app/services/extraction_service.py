@@ -14,9 +14,7 @@ def _levenshtein(s1: str, s2: str) -> int:
     for i, c1 in enumerate(s1):
         curr = [i + 1]
         for j, c2 in enumerate(s2):
-            curr.append(
-                min(prev[j + 1] + 1, curr[j] + 1, prev[j] + (c1 != c2))
-            )
+            curr.append(min(prev[j + 1] + 1, curr[j] + 1, prev[j] + (c1 != c2)))
         prev = curr
     return prev[-1]
 
@@ -244,12 +242,8 @@ class ExtractionService:
             company_name=ExtractionField(
                 value=company, confidence=company_conf, source=company_src
             ),
-            phone=ExtractionField(
-                value=phone, confidence=phone_conf, source=phone_src
-            ),
-            date=ExtractionField(
-                value=date, confidence=date_conf, source=date_src
-            ),
+            phone=ExtractionField(value=phone, confidence=phone_conf, source=phone_src),
+            date=ExtractionField(value=date, confidence=date_conf, source=date_src),
             invoice_number=ExtractionField(
                 value=inv_num, confidence=inv_conf, source=inv_src
             ),

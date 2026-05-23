@@ -41,9 +41,7 @@ async def save_upload_file(
             size += len(chunk)
             if size > max_bytes:
                 max_mb = max_bytes // (1024 * 1024)
-                raise ValueError(
-                    f"File exceeds {max_mb}MB upload limit"
-                )
+                raise ValueError(f"File exceeds {max_mb}MB upload limit")
             await out_file.write(chunk)
     await file.seek(0)
     return size
