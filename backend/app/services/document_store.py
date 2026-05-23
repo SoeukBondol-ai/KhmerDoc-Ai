@@ -1,7 +1,7 @@
 from pathlib import Path
+
 from app.schemas.document import DocumentRecord
 from app.utils.files import read_json, write_json
-
 
 
 class DocumentStore:

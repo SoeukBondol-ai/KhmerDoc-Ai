@@ -2,10 +2,11 @@ from fastapi import Request
 
 from app.core.config import Settings
 from app.services.document_store import DocumentStore
-from app.services.kiri_ocr_service import KiriOCRService
-from app.services.ocr_pipeline import OCRPipeline
-from app.services.extraction_service import ExtractionService
 from app.services.extraction_pipeline import ExtractionPipeline
+from app.services.extraction_service import ExtractionService
+from app.services.nextspell_service import NextSpellService
+from app.services.ocr_pipeline import OCRPipeline
+
 
 def get_settings_from_app(request: Request) -> Settings:
     return request.app.state.settings
@@ -16,9 +17,9 @@ def get_document_store(request: Request) -> DocumentStore:
     return DocumentStore(settings.upload_dir, settings.ocr_output_dir)
 
 
-def get_ocr_service(request: Request) -> KiriOCRService:
+def get_ocr_service(request: Request) -> NextSpellService:
     settings = get_settings_from_app(request)
-    return KiriOCRService(settings)
+    return NextSpellService(settings)
 
 
 def get_ocr_pipeline(request: Request) -> OCRPipeline:
@@ -35,4 +36,3 @@ def get_extraction_pipeline(request: Request) -> ExtractionPipeline:
         extraction_service=ExtractionService(),
         extraction_dir=settings.extraction_dir,
     )
-

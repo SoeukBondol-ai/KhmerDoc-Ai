@@ -1,14 +1,15 @@
 from app.schemas.document import OCRResponse
 from app.services.document_store import DocumentStore
-from app.services.kiri_ocr_service import KiriOCRService
+from app.services.nextspell_service import NextSpellService
 from app.utils.files import read_json, utc_now, write_json
 
+
 class OCRPipeline:
-    def __init__(self, store:DocumentStore , ocr_service:KiriOCRService):
+    def __init__(self, store: DocumentStore, ocr_service: NextSpellService):
         self.store = store
         self.ocr_service = ocr_service
-    
-    async def run(self, document_id : str , force: bool = False) -> OCRResponse :
+
+    async def run(self, document_id: str, force: bool = False) -> OCRResponse:
         document = self.store.get_document(document_id)
         if document is None:
             raise FileNotFoundError(document_id)
@@ -21,7 +22,7 @@ class OCRPipeline:
             document_id=document_id,
             text=result["text"],
             language="km",
-            source="auto",
+            source="nextspell",
             created_at=utc_now(),
             raw_response=result["raw_response"],
         )

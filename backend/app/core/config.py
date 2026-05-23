@@ -1,6 +1,7 @@
 from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -10,7 +11,7 @@ class Settings(BaseSettings):
     )
     app_name : str = "KhmerDocAI"
     app_env : str  = "local"
-    api_v1_prefix: str = "/api/v1" 
+    api_v1_prefix: str = "/api/v1"
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
 
@@ -19,9 +20,16 @@ class Settings(BaseSettings):
     extraction_dir: Path = Path("storage/extractions")
     max_upload_mb: int = 15
 
+    nextspell_username: str = ""
+    nextspell_secret_key: str = ""
+
     @property
     def cors_origins_list(self) -> list[str]:
-        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+        return [
+            origin.strip()
+            for origin in self.cors_origins.split(",")
+            if origin.strip()
+        ]
 
     @property
     def max_upload_bytes(self) -> int:
