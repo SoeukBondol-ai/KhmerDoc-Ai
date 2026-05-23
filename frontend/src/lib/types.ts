@@ -22,6 +22,8 @@ export type LayoutRegion = {
   bbox: [number, number, number, number];
   confidence: number;
   source: string;
+  display_color: string;
+  normalized_bbox?: number[] | null;
 };
 
 export type LayoutDetectionResponse = {
@@ -29,6 +31,7 @@ export type LayoutDetectionResponse = {
   regions: LayoutRegion[];
   image_width?: number | null;
   image_height?: number | null;
+  mode: string;
 };
 
 export type UploadResponse = {

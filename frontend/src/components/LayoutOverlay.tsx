@@ -1,18 +1,76 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LayoutRegion } from "@/lib/types";
 
-const LABEL_COLORS: Record<string, { border: string; bg: string; text: string }> = {
-  header: { border: "border-blue-300", bg: "bg-blue-50/70", text: "text-blue-700" },
-  seller_info: { border: "border-teal-300", bg: "bg-teal-50/70", text: "text-teal-700" },
-  buyer_info: { border: "border-violet-300", bg: "bg-violet-50/70", text: "text-violet-700" },
-  table: { border: "border-amber-300", bg: "bg-amber-50/70", text: "text-amber-700" },
-  total_section: { border: "border-rose-300", bg: "bg-rose-50/70", text: "text-rose-700" },
-  footer: { border: "border-gray-300", bg: "bg-gray-50/70", text: "text-gray-700" },
-  stamp: { border: "border-pink-300", bg: "bg-pink-50/70", text: "text-pink-700" },
-  signature: { border: "border-indigo-300", bg: "bg-indigo-50/70", text: "text-indigo-700" },
-  unknown: { border: "border-slate-300", bg: "bg-slate-50/70", text: "text-slate-700" },
+type RgbaColor = {
+  fill: string;
+  border: string;
+  text: string;
+  chip: string;
+};
+
+const LABEL_COLORS: Record<string, RgbaColor> = {
+  header: {
+    fill: "rgba(249,115,22,0.18)",
+    border: "rgba(249,115,22,0.7)",
+    text: "#c2410c",
+    chip: "rgba(249,115,22,0.15)",
+  },
+  form_field: {
+    fill: "rgba(34,197,94,0.18)",
+    border: "rgba(34,197,94,0.7)",
+    text: "#15803d",
+    chip: "rgba(34,197,94,0.15)",
+  },
+  footer: {
+    fill: "rgba(107,114,128,0.18)",
+    border: "rgba(107,114,128,0.7)",
+    text: "#374151",
+    chip: "rgba(107,114,128,0.15)",
+  },
+  table: {
+    fill: "rgba(59,130,246,0.18)",
+    border: "rgba(59,130,246,0.7)",
+    text: "#1d4ed8",
+    chip: "rgba(59,130,246,0.15)",
+  },
+  total_section: {
+    fill: "rgba(236,72,153,0.18)",
+    border: "rgba(236,72,153,0.7)",
+    text: "#be185d",
+    chip: "rgba(236,72,153,0.15)",
+  },
+  seller_info: {
+    fill: "rgba(139,92,246,0.18)",
+    border: "rgba(139,92,246,0.7)",
+    text: "#6d28d9",
+    chip: "rgba(139,92,246,0.15)",
+  },
+  buyer_info: {
+    fill: "rgba(6,182,212,0.18)",
+    border: "rgba(6,182,212,0.7)",
+    text: "#0e7490",
+    chip: "rgba(6,182,212,0.15)",
+  },
+  stamp: {
+    fill: "rgba(244,63,94,0.18)",
+    border: "rgba(244,63,94,0.7)",
+    text: "#be123c",
+    chip: "rgba(244,63,94,0.15)",
+  },
+  signature: {
+    fill: "rgba(99,102,241,0.18)",
+    border: "rgba(99,102,241,0.7)",
+    text: "#4338ca",
+    chip: "rgba(99,102,241,0.15)",
+  },
+  unknown: {
+    fill: "rgba(100,116,139,0.18)",
+    border: "rgba(100,116,139,0.7)",
+    text: "#334155",
+    chip: "rgba(100,116,139,0.15)",
+  },
 };
 
 const DEFAULT_COLOR = LABEL_COLORS.unknown;
@@ -34,49 +92,85 @@ export default function LayoutOverlay({
   imageUrl: string;
   alt?: string;
 }) {
-  const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [renderedSize, setRenderedSize] = useState<{
+    w: number;
+    h: number;
+  } | null>(null);
 
-  const handleLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
+  const measure = useCallback(() => {
+    if (imgRef.current) {
+      setRenderedSize({ w: imgRef.current.clientWidth, h: imgRef.current.clientHeight });
+    }
   }, []);
 
-  const baseW = imageWidth ?? naturalSize?.w;
-  const baseH = imageHeight ?? naturalSize?.h;
-  const hasDimensions = baseW != null && baseH != null;
+  useEffect(() => {
+    const el = imgRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver(() => measure());
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [measure]);
+
+  const baseW = imageWidth ?? null;
+  const baseH = imageHeight ?? null;
+  const canRender = baseW && baseH && renderedSize;
 
   return (
-    <div className="relative inline-block">
+    <div ref={containerRef} className="relative inline-block">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imgRef}
         src={imageUrl}
         alt={alt}
         className="max-h-125 rounded-lg object-contain"
-        onLoad={handleLoad}
+        onLoad={measure}
       />
-      {hasDimensions &&
+      {canRender &&
         regions.map((region) => {
           const [xMin, yMin, xMax, yMax] = region.bbox;
-          const left = (xMin / baseW!) * 100;
-          const top = (yMin / baseH!) * 100;
-          const width = ((xMax - xMin) / baseW!) * 100;
-          const height = ((yMax - yMin) / baseH!) * 100;
+          const scaleX = renderedSize.w / baseW!;
+          const scaleY = renderedSize.h / baseH!;
+
+          const left = xMin * scaleX;
+          const top = yMin * scaleY;
+          const width = (xMax - xMin) * scaleX;
+          const height = (yMax - yMin) * scaleY;
+
           const colors = LABEL_COLORS[region.label] ?? DEFAULT_COLOR;
 
           return (
             <div
               key={region.id}
-              className={`pointer-events-none absolute ${colors.border} ${colors.bg} ${colors.text}`}
               style={{
-                left: `${left}%`,
-                top: `${top}%`,
-                width: `${width}%`,
-                height: `${height}%`,
-                borderWidth: 1.5,
+                position: "absolute",
+                left: `${left}px`,
+                top: `${top}px`,
+                width: `${width}px`,
+                height: `${height}px`,
+                backgroundColor: colors.fill,
+                border: `2px solid ${colors.border}`,
+                pointerEvents: "none",
+                overflow: "hidden",
               }}
             >
               <span
-                className={`absolute -top-4 left-0.5 truncate rounded px-1 text-[10px] font-semibold leading-tight ${colors.bg} ${colors.text}`}
+                style={{
+                  position: "absolute",
+                  top: 2,
+                  left: 4,
+                  display: "inline-block",
+                  padding: "1px 6px",
+                  borderRadius: 4,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  lineHeight: "16px",
+                  backgroundColor: colors.chip,
+                  color: colors.text,
+                  whiteSpace: "nowrap",
+                }}
               >
                 {formatLabel(region.label)}
               </span>

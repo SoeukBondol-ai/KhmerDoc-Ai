@@ -2,20 +2,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-LAYOUT_LABELS = (
-    "header",
-    "seller_info",
-    "buyer_info",
-    "table",
-    "total_section",
-    "footer",
-    "stamp",
-    "signature",
-    "unknown",
-)
-
 LayoutLabel = Literal[
     "header",
+    "form_field",
     "seller_info",
     "buyer_info",
     "table",
@@ -33,6 +22,10 @@ class LayoutRegion(BaseModel):
     bbox: list[float] = Field(min_length=4, max_length=4)
     confidence: float = Field(ge=0.0, le=1.0, default=0.0)
     source: str = ""
+    display_color: str = ""
+    normalized_bbox: list[float] | None = Field(
+        default=None, min_length=4, max_length=4
+    )
 
     @field_validator("bbox")
     @classmethod
@@ -43,7 +36,9 @@ class LayoutRegion(BaseModel):
             )
         x_min, y_min, x_max, y_max = v
         if x_max <= x_min or y_max <= y_min:
-            raise ValueError("bbox x_max must be > x_min and y_max must be > y_min")
+            raise ValueError(
+                "bbox x_max must be > x_min and y_max must be > y_min"
+            )
         return v
 
 
@@ -56,3 +51,4 @@ class LayoutDetectionResponse(BaseModel):
     regions: list[LayoutRegion] = Field(default_factory=list)
     image_width: int | None = None
     image_height: int | None = None
+    mode: str = "mock"
