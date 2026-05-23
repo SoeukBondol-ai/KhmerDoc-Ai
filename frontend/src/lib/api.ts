@@ -32,11 +32,25 @@ export async function runExtraction(documentId: string) {
   );
 }
 
+export async function runLayout(documentId: string) {
+  return request<import("./types").LayoutDetectionResponse>(
+    `/documents/${documentId}/layout`,
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
+  );
+}
+
+export async function getLayout(documentId: string) {
+  return request<import("./types").LayoutDetectionResponse>(
+    `/documents/${documentId}/layout`,
+  );
+}
+
 export async function getDocument(documentId: string) {
   return request<{
     document: import("./types").DocumentRecord;
     ocr: import("./types").OcrResponse | null;
     extraction: import("./types").ExtractionResponse | null;
+    layout: import("./types").LayoutDetectionResponse | null;
   }>(`/documents/${documentId}`);
 }
 

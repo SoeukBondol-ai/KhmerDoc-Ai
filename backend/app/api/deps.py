@@ -4,6 +4,7 @@ from app.core.config import Settings
 from app.services.document_store import DocumentStore
 from app.services.extraction_pipeline import ExtractionPipeline
 from app.services.extraction_service import ExtractionService
+from app.services.layout_service import LayoutService, MockLayoutDetector
 from app.services.nextspell_service import NextSpellService
 from app.services.ocr_pipeline import OCRPipeline
 
@@ -35,4 +36,14 @@ def get_extraction_pipeline(request: Request) -> ExtractionPipeline:
         store=get_document_store(request),
         extraction_service=ExtractionService(),
         extraction_dir=settings.extraction_dir,
+    )
+
+
+def get_layout_service(request: Request) -> LayoutService:
+    settings = get_settings_from_app(request)
+    return LayoutService(
+        store=get_document_store(request),
+        detector=MockLayoutDetector(),
+        layout_dir=settings.layout_dir,
+        upload_dir=settings.upload_dir,
     )

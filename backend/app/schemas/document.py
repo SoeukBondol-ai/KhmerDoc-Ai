@@ -5,6 +5,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from app.schemas.extraction import ExtractionResponse
+from app.schemas.layout import LayoutDetectionResponse
 
 
 class DocumentCreateResponse(BaseModel):
@@ -44,6 +45,7 @@ class DocumentDetailResponse(BaseModel):
     document: DocumentRecord
     ocr: OCRResponse | None = None
     extraction: ExtractionResponse | None = None
+    layout: LayoutDetectionResponse | None = None
 
 
 class DocumentListResponse(BaseModel):

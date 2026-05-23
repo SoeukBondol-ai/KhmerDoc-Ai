@@ -16,6 +16,21 @@ export type DocumentExtraction = {
   raw_text_preview?: string | null;
 };
 
+export type LayoutRegion = {
+  id: string;
+  label: string;
+  bbox: [number, number, number, number];
+  confidence: number;
+  source: string;
+};
+
+export type LayoutDetectionResponse = {
+  document_id: string;
+  regions: LayoutRegion[];
+  image_width?: number | null;
+  image_height?: number | null;
+};
+
 export type UploadResponse = {
   document_id: string;
   filename: string;
@@ -54,5 +69,6 @@ export type ProcessingStep =
   | "uploading"
   | "running_ocr"
   | "extracting"
+  | "detecting_layout"
   | "done"
   | "error";

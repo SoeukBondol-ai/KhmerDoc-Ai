@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, File, UploadFile, status
 from app.api.deps import (
     get_document_store,
     get_extraction_pipeline,
+    get_layout_service,
     get_ocr_pipeline,
     get_settings_from_app,
 )
@@ -19,8 +20,10 @@ from app.schemas.document import (
     OCRResponse,
 )
 from app.schemas.extraction import ExtractionRequest, ExtractionResponse
+from app.schemas.layout import LayoutDetectionRequest, LayoutDetectionResponse
 from app.services.document_store import DocumentStore
 from app.services.extraction_pipeline import ExtractionPipeline
+from app.services.layout_service import LayoutService
 from app.services.ocr_pipeline import OCRPipeline
 from app.utils.files import (
     extension_for_upload,
@@ -103,7 +106,14 @@ async def get_document(
     if extraction_path.exists():
         extraction = ExtractionResponse.model_validate(read_json(extraction_path))
 
-    return DocumentDetailResponse(document=document, ocr=ocr, extraction=extraction)
+    layout = None
+    layout_path = settings.layout_dir / f"{document_id}.json"
+    if layout_path.exists():
+        layout = LayoutDetectionResponse.model_validate(read_json(layout_path))
+
+    return DocumentDetailResponse(
+        document=document, ocr=ocr, extraction=extraction, layout=layout
+    )
 
 
 @router.post("/{document_id}/ocr", response_model=OCRResponse)
@@ -136,3 +146,29 @@ async def run_extraction(
         raise bad_request(str(exc)) from exc
     except Exception as exc:
         raise service_unavailable(f"Extraction failed: {exc}") from exc
+
+
+@router.get("/{document_id}/layout", response_model=LayoutDetectionResponse)
+async def get_layout(
+    document_id: str,
+    settings: Settings = Depends(get_settings_from_app),
+) -> LayoutDetectionResponse:
+    layout_path = settings.layout_dir / f"{document_id}.json"
+    if not layout_path.exists():
+        raise not_found(f"Layout not found for document: {document_id}")
+    return LayoutDetectionResponse.model_validate(read_json(layout_path))
+
+
+@router.post("/{document_id}/layout", response_model=LayoutDetectionResponse)
+async def run_layout(
+    document_id: str,
+    body: LayoutDetectionRequest | None = None,
+    service: LayoutService = Depends(get_layout_service),
+) -> LayoutDetectionResponse:
+    try:
+        force = body.force if body else False
+        return await service.run(document_id=document_id, force=force)
+    except FileNotFoundError as exc:
+        raise not_found(f"Document not found: {document_id}") from exc
+    except Exception as exc:
+        raise service_unavailable(f"Layout detection failed: {exc}") from exc
