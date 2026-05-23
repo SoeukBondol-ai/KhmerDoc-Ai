@@ -25,10 +25,12 @@ class NextSpellService:
             try:
                 for event in self.client.ocr_image_events(str(file_path)):
                     if isinstance(event, dict) and "text" in event:
-                        raw_lines.append({
-                            "text": event.get("text", ""),
-                            "confidence": event.get("confidence", 0.0),
-                        })
+                        raw_lines.append(
+                            {
+                                "text": event.get("text", ""),
+                                "confidence": event.get("confidence", 0.0),
+                            }
+                        )
                     elif isinstance(event, str):
                         raw_lines.append({"text": event, "confidence": 0.0})
             except Exception:

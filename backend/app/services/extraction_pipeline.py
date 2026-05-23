@@ -33,9 +33,7 @@ class ExtractionPipeline:
         ocr_text = ocr_data.get("text", "")
         raw_lines = ocr_data.get("raw_response", {}).get("lines", [])
 
-        extracted = self.extraction_service.extract(
-            ocr_text, raw_lines, document_id
-        )
+        extracted = self.extraction_service.extract(ocr_text, raw_lines, document_id)
 
         response = ExtractionResponse(
             document_id=document_id,

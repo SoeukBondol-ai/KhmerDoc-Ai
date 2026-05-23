@@ -32,12 +32,13 @@ from app.utils.files import (
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
+
 @router.post(
     "/upload",
-    response_model = DocumentCreateResponse,
-    status_code = status.HTTP_201_CREATED,
-    summary = "UPload docment to start processing",
-    response_description="Document uploaded successfully"
+    response_model=DocumentCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="UPload docment to start processing",
+    response_description="Document uploaded successfully",
 )
 async def upload_document(
     file: UploadFile = File(...),

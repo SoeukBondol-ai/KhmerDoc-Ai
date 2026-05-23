@@ -15,8 +15,10 @@ class DocumentCreateResponse(BaseModel):
     saved_path: str
     created_at: datetime
 
+
 class OCRRequest(BaseModel):
     force: bool = False
+
 
 class OCRResponse(BaseModel):
     document_id: str
@@ -25,6 +27,7 @@ class OCRResponse(BaseModel):
     source: str | None = None
     raw_response: Any | None = None
     created_at: datetime
+
 
 class DocumentRecord(BaseModel):
     document_id: str
@@ -35,6 +38,7 @@ class DocumentRecord(BaseModel):
     saved_path: Path
     created_at: datetime
     ocr_output_path: Path | None = None
+
 
 class DocumentDetailResponse(BaseModel):
     document: DocumentRecord
