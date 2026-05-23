@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     upload_dir: Path = Path("storage/uploads")
     ocr_output_dir: Path = Path("storage/ocr_outputs")
     extraction_dir: Path = Path("storage/extractions")
+    layout_dir: Path = Path("storage/layouts")
     max_upload_mb: int = 15
 
     nextspell_username: str = ""

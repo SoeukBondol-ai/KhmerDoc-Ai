@@ -6,6 +6,7 @@ const STEPS: { key: ProcessingStep; label: string }[] = [
   { key: "uploading", label: "Uploading document" },
   { key: "running_ocr", label: "Running OCR" },
   { key: "extracting", label: "Extracting fields" },
+  { key: "detecting_layout", label: "Detecting layout" },
 ];
 
 export default function LoadingState({ step }: { step: ProcessingStep }) {

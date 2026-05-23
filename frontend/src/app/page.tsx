@@ -4,15 +4,17 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 import type {
   ExtractionResponse,
+  LayoutDetectionResponse,
   OcrResponse,
   ProcessingStep,
   UploadResponse,
 } from "@/lib/types";
-import { uploadDocument, runOcr, runExtraction } from "@/lib/api";
+import { uploadDocument, runOcr, runExtraction, runLayout } from "@/lib/api";
 import FileUpload from "@/components/FileUpload";
 import DocumentPreview from "@/components/DocumentPreview";
 import OcrTextPanel from "@/components/OcrTextPanel";
 import ExtractionJsonPanel from "@/components/ExtractionJsonPanel";
+import LayoutRegionList from "@/components/LayoutRegionList";
 import LoadingState from "@/components/LoadingState";
 import ErrorMessage from "@/components/ErrorMessage";
 
@@ -25,6 +27,8 @@ export default function Home() {
   const [ocrResult, setOcrResult] = useState<OcrResponse | null>(null);
   const [extractionResult, setExtractionResult] =
     useState<ExtractionResponse | null>(null);
+  const [layoutResult, setLayoutResult] =
+    useState<LayoutDetectionResponse | null>(null);
 
   const process = useCallback(
     async (file: File) => {
@@ -32,6 +36,7 @@ export default function Home() {
       setError(null);
       setOcrResult(null);
       setExtractionResult(null);
+      setLayoutResult(null);
 
       try {
         setStep("uploading");
@@ -47,6 +52,12 @@ export default function Home() {
           upload.document_id,
         );
         setExtractionResult(extraction);
+
+        setStep("detecting_layout");
+        const layout: LayoutDetectionResponse = await runLayout(
+          upload.document_id,
+        );
+        setLayoutResult(layout);
 
         setStep("done");
       } catch (err) {
@@ -68,6 +79,7 @@ export default function Home() {
     setError(null);
     setOcrResult(null);
     setExtractionResult(null);
+    setLayoutResult(null);
   }, []);
 
   const hasResult =
@@ -144,7 +156,16 @@ export default function Home() {
             {/* Left column */}
             <div className="flex flex-col gap-6">
               {file && documentId && (
-                <DocumentPreview file={file} documentId={documentId} />
+                <DocumentPreview
+                  file={file}
+                  documentId={documentId}
+                  layoutRegions={layoutResult?.regions}
+                  imageWidth={layoutResult?.image_width}
+                  imageHeight={layoutResult?.image_height}
+                />
+              )}
+              {layoutResult && layoutResult.regions.length > 0 && (
+                <LayoutRegionList regions={layoutResult.regions} />
               )}
               {ocrResult && <OcrTextPanel text={ocrResult.text} />}
             </div>

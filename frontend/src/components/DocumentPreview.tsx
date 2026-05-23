@@ -1,11 +1,20 @@
 "use client";
 
+import type { LayoutRegion } from "@/lib/types";
+import LayoutOverlay from "./LayoutOverlay";
+
 export default function DocumentPreview({
   file,
   documentId,
+  layoutRegions,
+  imageWidth,
+  imageHeight,
 }: {
   file: File;
   documentId: string;
+  layoutRegions?: LayoutRegion[];
+  imageWidth?: number | null;
+  imageHeight?: number | null;
 }) {
   const isImage = file.type.startsWith("image/");
   const imageUrl = isImage ? URL.createObjectURL(file) : null;
@@ -59,6 +68,8 @@ export default function DocumentPreview({
     );
   }
 
+  const showOverlay = layoutRegions && layoutRegions.length > 0;
+
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
       <div className="flex items-center gap-2 border-b border-border px-5 py-3">
@@ -78,15 +89,30 @@ export default function DocumentPreview({
         <span className="text-[13px] font-semibold text-foreground">
           Original Document
         </span>
+        {showOverlay && (
+          <span className="ml-auto rounded-md bg-primary-bg px-2 py-0.5 text-[11px] font-medium text-primary">
+            Layout overlay
+          </span>
+        )}
       </div>
       <div className="flex items-center justify-center bg-muted/50 p-4">
-        {imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imageUrl}
+        {showOverlay ? (
+          <LayoutOverlay
+            regions={layoutRegions}
+            imageWidth={imageWidth}
+            imageHeight={imageHeight}
+            imageUrl={imageUrl!}
             alt="Uploaded document"
-            className="max-h-125 rounded-lg object-contain"
           />
+        ) : (
+          imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
+              alt="Uploaded document"
+              className="max-h-125 rounded-lg object-contain"
+            />
+          )
         )}
       </div>
     </div>
