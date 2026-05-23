@@ -1,12 +1,14 @@
-from pydantic import BaseModel, Field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from pydantic import BaseModel, Field
+
 from app.schemas.extraction import ExtractionResponse
 
+
 class DocumentCreateResponse(BaseModel):
-    document_id: str 
+    document_id: str
     filename: str
     content_type: str
     size_bytes: int

@@ -1,13 +1,18 @@
 from pathlib import Path
 
-from app.schemas.extraction import ExtractionResponse, ExtractedDocument
+from app.schemas.extraction import ExtractionResponse
 from app.services.document_store import DocumentStore
 from app.services.extraction_service import ExtractionService
-from app.utils.files import read_json, utc_now, write_json
+from app.utils.files import read_json, write_json
 
 
 class ExtractionPipeline:
-    def __init__(self, store: DocumentStore, extraction_service: ExtractionService, extraction_dir: Path):
+    def __init__(
+        self,
+        store: DocumentStore,
+        extraction_service: ExtractionService,
+        extraction_dir: Path,
+    ):
         self.store = store
         self.extraction_service = extraction_service
         self.extraction_dir = extraction_dir
@@ -28,12 +33,13 @@ class ExtractionPipeline:
         ocr_text = ocr_data.get("text", "")
         raw_lines = ocr_data.get("raw_response", {}).get("lines", [])
 
-        extracted: ExtractedDocument = self.extraction_service.extract(ocr_text, raw_lines, document_id)
+        extracted = self.extraction_service.extract(
+            ocr_text, raw_lines, document_id
+        )
 
         response = ExtractionResponse(
             document_id=document_id,
             extraction=extracted,
-            created_at=utc_now(),
         )
 
         write_json(output_path, response.model_dump(mode="json"))

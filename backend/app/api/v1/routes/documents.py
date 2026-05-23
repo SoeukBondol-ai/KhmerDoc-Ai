@@ -1,7 +1,13 @@
 from pathlib import Path
+
 from fastapi import APIRouter, Depends, File, UploadFile, status
 
-from app.api.deps import get_document_store, get_extraction_pipeline, get_ocr_pipeline, get_settings_from_app
+from app.api.deps import (
+    get_document_store,
+    get_extraction_pipeline,
+    get_ocr_pipeline,
+    get_settings_from_app,
+)
 from app.core.config import Settings
 from app.core.exceptions import bad_request, not_found, service_unavailable
 from app.schemas.document import (
@@ -14,9 +20,15 @@ from app.schemas.document import (
 )
 from app.schemas.extraction import ExtractionRequest, ExtractionResponse
 from app.services.document_store import DocumentStore
-from app.services.ocr_pipeline import OCRPipeline
 from app.services.extraction_pipeline import ExtractionPipeline
-from app.utils.files import extension_for_upload, make_document_id, read_json, save_upload_file, utc_now
+from app.services.ocr_pipeline import OCRPipeline
+from app.utils.files import (
+    extension_for_upload,
+    make_document_id,
+    read_json,
+    save_upload_file,
+    utc_now,
+)
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -100,7 +112,8 @@ async def run_ocr(
     pipeline: OCRPipeline = Depends(get_ocr_pipeline),
 ) -> OCRResponse:
     try:
-        return await pipeline.run(document_id=document_id, force=body.force if body else False)
+        force = body.force if body else False
+        return await pipeline.run(document_id=document_id, force=force)
     except FileNotFoundError as exc:
         raise not_found(f"Document not found: {document_id}") from exc
     except Exception as exc:
@@ -114,7 +127,8 @@ async def run_extraction(
     pipeline: ExtractionPipeline = Depends(get_extraction_pipeline),
 ) -> ExtractionResponse:
     try:
-        return await pipeline.run(document_id=document_id, force=body.force if body else False)
+        force = body.force if body else False
+        return await pipeline.run(document_id=document_id, force=force)
     except FileNotFoundError as exc:
         raise not_found(f"Document not found: {document_id}") from exc
     except ValueError as exc:
