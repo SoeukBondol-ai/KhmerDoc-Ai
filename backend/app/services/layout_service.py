@@ -14,26 +14,40 @@ class LayoutDetector(Protocol):
 
 
 # ---------------------------------------------------------------------------
-# Mock detector — returns percentage-based placeholder bounding boxes.
+# Mock detector — returns realistic percentage-based placeholder regions.
 # Replace this class with a YOLOv8-based detector when a trained model is ready.
 # ---------------------------------------------------------------------------
 
+FALLBACK_WIDTH = 800
+FALLBACK_HEIGHT = 1100
+
+_LABEL_COLORS: dict[str, str] = {
+    "header": "orange",
+    "form_field": "green",
+    "footer": "gray",
+    "table": "blue",
+    "total_section": "pink",
+    "seller_info": "purple",
+    "buyer_info": "cyan",
+    "stamp": "rose",
+    "signature": "indigo",
+    "unknown": "slate",
+}
+
+# Each entry: (label, x_min_pct, y_min_pct, x_max_pct, y_max_pct)
 _MOCK_REGIONS: list[tuple[LayoutLabel, float, float, float, float]] = [
-    ("header", 0.05, 0.02, 0.95, 0.15),
-    ("seller_info", 0.05, 0.16, 0.48, 0.30),
-    ("buyer_info", 0.52, 0.16, 0.95, 0.30),
-    ("table", 0.05, 0.32, 0.95, 0.77),
-    ("total_section", 0.55, 0.78, 0.95, 0.90),
-    ("footer", 0.05, 0.91, 0.95, 0.98),
+    ("header", 0.08, 0.05, 0.92, 0.33),
+    ("form_field", 0.08, 0.33, 0.92, 0.74),
+    ("footer", 0.08, 0.74, 0.92, 0.94),
 ]
 
 
 class MockLayoutDetector:
-    """Returns hardcoded layout regions based on image dimensions.
+    """Returns realistic layout regions based on image dimensions.
 
-    When ``image_width`` / ``image_height`` are available the returned
-    bounding boxes use pixel coordinates.  Otherwise normalised 0–1 values
-    are returned.
+    When ``image_width`` / ``image_height`` are provided, bounding boxes
+    are returned in pixel coordinates.  A fallback of 800x1100 is used
+    when dimensions are unavailable.
     """
 
     MOCK_CONFIDENCE = 0.60
@@ -42,24 +56,25 @@ class MockLayoutDetector:
     def detect(
         self, image_width: int | None, image_height: int | None
     ) -> list[LayoutRegion]:
+        w = image_width if image_width else FALLBACK_WIDTH
+        h = image_height if image_height else FALLBACK_HEIGHT
+
         regions: list[LayoutRegion] = []
         for idx, (label, x_min_p, y_min_p, x_max_p, y_max_p) in enumerate(
             _MOCK_REGIONS, start=1
         ):
-            if image_width and image_height:
-                bbox = [
-                    round(x_min_p * image_width, 1),
-                    round(y_min_p * image_height, 1),
-                    round(x_max_p * image_width, 1),
-                    round(y_max_p * image_height, 1),
-                ]
-            else:
-                bbox = [
-                    round(x_min_p, 4),
-                    round(y_min_p, 4),
-                    round(x_max_p, 4),
-                    round(y_max_p, 4),
-                ]
+            bbox = [
+                round(x_min_p * w, 1),
+                round(y_min_p * h, 1),
+                round(x_max_p * w, 1),
+                round(y_max_p * h, 1),
+            ]
+            normalized_bbox = [
+                round(x_min_p, 4),
+                round(y_min_p, 4),
+                round(x_max_p, 4),
+                round(y_max_p, 4),
+            ]
 
             regions.append(
                 LayoutRegion(
@@ -68,6 +83,8 @@ class MockLayoutDetector:
                     bbox=bbox,
                     confidence=self.MOCK_CONFIDENCE,
                     source=self.SOURCE,
+                    display_color=_LABEL_COLORS.get(label, "slate"),
+                    normalized_bbox=normalized_bbox,
                 )
             )
         return regions
@@ -116,8 +133,9 @@ class LayoutService:
         response = LayoutDetectionResponse(
             document_id=document_id,
             regions=regions,
-            image_width=image_width,
-            image_height=image_height,
+            image_width=image_width or FALLBACK_WIDTH,
+            image_height=image_height or FALLBACK_HEIGHT,
+            mode="mock",
         )
 
         write_json(output_path, response.model_dump(mode="json"))

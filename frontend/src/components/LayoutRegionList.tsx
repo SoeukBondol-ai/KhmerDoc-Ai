@@ -1,20 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import type { LayoutRegion } from "@/lib/types";
 
-const LABEL_DOTS: Record<string, string> = {
-  header: "bg-blue-400",
-  seller_info: "bg-teal-400",
-  buyer_info: "bg-violet-400",
-  table: "bg-amber-400",
-  total_section: "bg-rose-400",
-  footer: "bg-gray-400",
-  stamp: "bg-pink-400",
-  signature: "bg-indigo-400",
-  unknown: "bg-slate-400",
+const LABEL_DOT_COLORS: Record<string, string> = {
+  header: "#F97316",
+  form_field: "#22C55E",
+  footer: "#6B7280",
+  table: "#3B82F6",
+  total_section: "#EC4899",
+  seller_info: "#8B5CF6",
+  buyer_info: "#06B6D4",
+  stamp: "#F43F5E",
+  signature: "#6366F1",
+  unknown: "#64748B",
 };
 
-const DEFAULT_DOT = "bg-slate-400";
+const DEFAULT_DOT_COLOR = "#64748B";
 
 function confidenceStyle(confidence: number) {
   if (confidence >= 0.8) return "bg-success-bg text-success-text";
@@ -59,42 +61,60 @@ export default function LayoutRegionList({
 
       {isMock && (
         <div className="border-b border-border bg-amber-50/60 px-5 py-2.5 text-[12px] leading-snug text-amber-800">
-          Demo mode &mdash; layout regions are simulated placeholders. A trained YOLO model will replace this later.
+          Demo mode &mdash; layout regions are simulated placeholders. A trained
+          YOLO model will replace this later.
         </div>
       )}
 
       <div className="px-5 py-1">
         {regions.map((region) => (
-          <div
-            key={region.id}
-            className="flex items-center justify-between gap-3 border-b border-border/50 py-2.5 last:border-b-0"
-          >
-            <div className="flex items-center gap-2">
-              <span
-                className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${LABEL_DOTS[region.label] ?? DEFAULT_DOT}`}
-              />
-              <span className="text-[13px] font-medium text-foreground">
-                {formatLabel(region.label)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-mono text-muted-foreground">
-                [{region.bbox.map((v) => Math.round(v)).join(", ")}]
-              </span>
-              <span
-                className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${confidenceStyle(region.confidence)}`}
-              >
-                {(region.confidence * 100).toFixed(0)}%
-              </span>
-              {region.source && (
-                <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
-                  {region.source}
-                </span>
-              )}
-            </div>
-          </div>
+          <RegionRow key={region.id} region={region} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function RegionRow({ region }: { region: LayoutRegion }) {
+  const [expanded, setExpanded] = useState(false);
+  const dotColor = LABEL_DOT_COLORS[region.label] ?? DEFAULT_DOT_COLOR;
+
+  return (
+    <div className="border-b border-border/50 py-2.5 last:border-b-0">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+            style={{ backgroundColor: dotColor }}
+          />
+          <span className="text-[13px] font-medium text-foreground">
+            {formatLabel(region.label)}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${confidenceStyle(region.confidence)}`}
+          >
+            {(region.confidence * 100).toFixed(0)}%
+          </span>
+          {region.source && (
+            <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+              {region.source}
+            </span>
+          )}
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
+          >
+            {expanded ? "hide" : "bbox"}
+          </button>
+        </div>
+      </div>
+      {expanded && (
+        <div className="mt-1 text-[11px] font-mono text-muted-foreground">
+          [{region.bbox.map((v) => Math.round(v)).join(", ")}]
+        </div>
+      )}
     </div>
   );
 }

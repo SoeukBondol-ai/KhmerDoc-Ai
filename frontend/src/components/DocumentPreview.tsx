@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { LayoutRegion } from "@/lib/types";
 import LayoutOverlay from "./LayoutOverlay";
 
@@ -16,8 +17,10 @@ export default function DocumentPreview({
   imageWidth?: number | null;
   imageHeight?: number | null;
 }) {
+  const [showOverlay, setShowOverlay] = useState(true);
   const isImage = file.type.startsWith("image/");
   const imageUrl = isImage ? URL.createObjectURL(file) : null;
+  const hasRegions = layoutRegions && layoutRegions.length > 0;
 
   if (!isImage) {
     return (
@@ -68,8 +71,6 @@ export default function DocumentPreview({
     );
   }
 
-  const showOverlay = layoutRegions && layoutRegions.length > 0;
-
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
       <div className="flex items-center gap-2 border-b border-border px-5 py-3">
@@ -89,14 +90,22 @@ export default function DocumentPreview({
         <span className="text-[13px] font-semibold text-foreground">
           Original Document
         </span>
-        {showOverlay && (
-          <span className="ml-auto rounded-md bg-primary-bg px-2 py-0.5 text-[11px] font-medium text-primary">
-            Layout overlay
-          </span>
+        {hasRegions && (
+          <button
+            onClick={() => setShowOverlay(!showOverlay)}
+            className="ml-auto rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors hover:bg-primary-hover hover:text-white"
+            style={
+              showOverlay
+                ? { backgroundColor: "var(--primary)", color: "#fff" }
+                : { backgroundColor: "var(--muted)", color: "var(--muted-foreground)" }
+            }
+          >
+            {showOverlay ? "Hide overlay" : "Show overlay"}
+          </button>
         )}
       </div>
       <div className="flex items-center justify-center bg-muted/50 p-4">
-        {showOverlay ? (
+        {hasRegions && showOverlay ? (
           <LayoutOverlay
             regions={layoutRegions}
             imageWidth={imageWidth}
